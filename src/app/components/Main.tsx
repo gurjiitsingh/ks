@@ -1,3 +1,7 @@
+'use client'
+
+import Image from "next/image";
+
 // src/app/components/Main.tsx
 export default function Main() {
   return (
@@ -10,20 +14,41 @@ export default function Main() {
           {/* Pure CSS Ambient Vector Mesh Glow */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="space-y-6 relative z-10">
-            <div className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              Halal Certified · Rainham
-            </div>
-            
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.05] uppercase">
-              Savour The <span className="text-red-600">Flavour</span>,<br />Any Time You Crave.
-            </h1>
-            
-            <p className="text-neutral-400 text-sm md:text-base font-light max-w-xl leading-relaxed">
-              Freshly prepared fried chicken crunch, flame-grilled succulent Peri-Peri basts, and gourmet smash burgers delivered hot right across RM13.
-            </p>
-          </div>
+       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
+  {/* Left */}
+  <div className="space-y-6">
+    <div className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+      Halal Certified · Rainham
+    </div>
+
+    <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-[1.05] uppercase">
+      Savour The
+      <span className="text-red-600"> Flavour</span>,
+      <br />
+      Any Time You Crave.
+    </h1>
+
+    <p className="text-neutral-400 text-sm md:text-base leading-relaxed max-w-md">
+      Freshly prepared fried chicken crunch, flame-grilled Peri-Peri,
+      gourmet burgers and freshly made meals every day.
+    </p>
+  </div>
+
+  {/* Right */}
+  <div className="relative flex justify-center">
+    <Image
+      src="/chicken.jpg"
+      alt="Delicious Chicken"
+      width={420}
+      height={420}
+      priority
+      className="object-contain drop-shadow-2xl"
+    />
+  </div>
+
+</div>
 
           <div className="pt-12 relative z-10 flex flex-col sm:flex-row gap-4">
             <button 
@@ -33,8 +58,8 @@ export default function Main() {
               Order From Menu Matrix
             </button>
             <a 
-              href="https://myshopify.com" 
-              target="_blank" 
+              href="/menu" 
+              
               rel="noopener noreferrer" 
               className="bg-neutral-900 border border-neutral-800 text-white font-bold text-xs uppercase tracking-widest px-8 py-4.5 rounded-2xl hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
             >

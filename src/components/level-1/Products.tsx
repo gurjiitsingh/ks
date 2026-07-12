@@ -32,14 +32,14 @@ const [productModifiers, setProductModifiers] = useState<any[]>([]);
 
 
 
-  const cardType = process.env.NEXT_PUBLIC_PRODUCT_CARD_TYPE;
+  const cardType = process.env.NEXT_PUBLIC_PRODUCT_CARD_TYPE; 
 
   //  DYNAMIC IMPORT — SAFE, NO RERENDER LOOP
 
   const Card = useMemo(() => {
     switch (cardType) {
       case "1":
-        return dynamic(() => import("../level-2/ProductCard-h1"));
+        return dynamic(() => import("../level-2/CustomProductCard"));
       case "11":
         return dynamic(() => import("../level-2/ProductCard-h1_1"));
       case "111":
@@ -217,7 +217,7 @@ const mappingData = await mappingRes.json();
   }
 
   return (
-    <div className="max-w-8xl mx-auto my-6">
+    <div className="max-w-7xl mx-auto my-6">
       <div className="px-4 sm:px-6 lg:px-12">
         <div className={containerClass}>
           {products.map((product, i) => (

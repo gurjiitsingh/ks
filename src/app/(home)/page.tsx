@@ -1,19 +1,21 @@
-'use client'
+  
 // app/page.tsx
 
 import { Suspense } from "react";
-//import AOSInit from "@/components/AOSInit";
+// //import AOSInit from "@/components/AOSInit";
 
-import HeroSectionCustom from "@/custom/cus-components/HeroSectionCustom";
-import CategorySliderLight from "@/components/level-1/CategorySliderLight";
-import Products from "@/components/level-1/Products";
-import BestOfMonth from "@/custom/cus-components/BestOfMonth";
-import ContactInfoWrapper from "@/components/ContactInfoWrapper";
+// import HeroSectionCustom from "@/custom/cus-components/HeroSectionCustom";
+// import CategorySliderLight from "@/components/level-1/CategorySliderLight";
+// import Products from "@/components/level-1/Products";
+// import BestOfMonth from "@/custom/cus-components/BestOfMonth";
+// import ContactInfoWrapper from "@/components/ContactInfoWrapper";
 import ProductsWrapper from "@/components/ProductsWrapper";
 import Navibar from "../components/Navibar";
 import Main from "../components/Main";
 import Menu from "../components/Menu";
 import Deals from "../components/Deals";
+import CategorySliderLight from "@/components/level-1/CategorySliderLight";
+import CategorySliderButton from "@/components/level-1/CategorySliderButton";
 
 
 
@@ -29,9 +31,13 @@ export default function Page() {
       <Main />
 
       {/* 3. Organized Digital Menu Matrix with All 15 Items */}
-      <Menu />
-      <Deals />
+      {/* <Menu /> */}
+      {/* <Deals /> */}
+ <CategorySliderButton />
 
+   <Suspense fallback={<div>Loading...</div>}>
+        <ProductsWrapper />
+      </Suspense>
       {/* 6. Corporate Location Footer Bar */}
       <footer id="location" className="bg-neutral-950 text-neutral-500 text-xs py-12 px-4 border-t border-neutral-900 text-center uppercase tracking-wider font-semibold">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
@@ -41,6 +47,8 @@ export default function Page() {
           </div>
         </div>
       </footer>
+
+     
 
     </div>
 
@@ -52,10 +60,8 @@ export default function Page() {
     //   {/* Sections */}
     //   <HeroSectionCustom />
     //   <BestOfMonth />
-    //   <CategorySliderLight />
-    //   <Suspense fallback={<div>Loading...</div>}>
-    //     <ProductsWrapper />
-    //   </Suspense>
+    //  
+     
 
     //   {/* ✅ Server async component with streaming */}
     //   <Suspense fallback={<div className="h-40" />}>
