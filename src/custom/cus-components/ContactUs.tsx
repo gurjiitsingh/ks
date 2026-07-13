@@ -164,14 +164,14 @@ const phone = outlet?.phone || "01708780264";
 
  <iframe
         title="Vardhman Traders Location"
-       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2482.8068990624542!2d0.1935575766206275!3d51.51675857181549!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8baa9ba9ef5e1%3A0x9dc5d8eeb25d5a9!2sTv%20%26%20Video%20Repairs%2C%20135%20Wennington%20Rd%2C%20Rainham%20RM13%209TR%2C%20UK!5e0!3m2!1sen!2sin!4v1783928506533!5m2!1sen!2sin"
-   className="w-full h-full"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2482.8068990688657!2d0.1935522120594252!3d51.51675857169787!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8bbd0e22ac8b9%3A0x79aac8c66c31335b!2sK%27s%20Chicken!5e0!3m2!1sen!2sin!4v1783931012388!5m2!1sen!2sin"
+    className="w-full h-full"
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
         allowFullScreen
         style={{ border: 0 }}
       />
-
+ 
 
           </div>
 
