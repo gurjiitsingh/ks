@@ -1,7 +1,7 @@
 export const SEO = {
-  title: " –  Carrer del Segle XX, 9, Horta-Guinardó, 08041 Barcelona, Spain",
+  title: "Welcome to K's Chicken, 135, Wennington Road, Rainham RM13 9TR Call us on 01708780264",
   description:
-    "Authentic food at  , Carrer del Segle XX, 9, Horta-Guinardó, 08041 Barcelona, Spain. Order online for delivery ",
+    "Your neighbourhood stop for golden fried chicken, wings, burgers, chips and family boxes on Wennington Road.",
 };
 
 
