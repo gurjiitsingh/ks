@@ -64,22 +64,22 @@ export default function HeroSectionSpotlight() {
           >
             {/* Spice Up  
             <br /> */}
-            ks Chicken
+            k's Chicken
           </h1>
 
           {/* Subtitle */}
           <p className="text-white/80 text-sm md:text-base mb-8 max-w-lg">
-           Manage inventory, production, billing, purchases, accounting, staff and branch operations with one powerful ERP platform built for Business.
+          Your neighbourhood stop for golden fried chicken, wings, burgers, chips and family boxes on Wennington Road.
           </p>
 
           {/* Buttons */}
           <div className="flex flex-wrap gap-4">
 
             <Link
-              href="/admin"
+              href="/"
               className="bg-[#ea9244] hover:bg-[#ff7b00] text-white px-7 py-3 rounded-full text-sm font-semibold shadow-xl transition"
             >
-             Login
+             Home
             </Link>
 
             <Link

@@ -1,11 +1,14 @@
 'use client'
 
+import BestOfMonth from "@/components/level-1/BestOfMonthUSAction";
+import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 // src/app/components/Main.tsx
 export default function Main() {
   return (
-    <header className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <header className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-18">
       {/* Asymmetric Dribbble-style Grid Block Setup */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         
@@ -20,7 +23,7 @@ export default function Main() {
   <div className="space-y-6">
     <div className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
       <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-      Halal Certified · Rainham
+      Halal 
     </div>
 
     <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-[1.05] uppercase">
@@ -77,6 +80,7 @@ export default function Main() {
               <span className="text-[10px] font-black uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full">Operational Hours</span>
               <span className="text-xl">🕒</span>
             </div>
+              {/* <BestOfMonth /> */}
             <div className="space-y-1">
               <p className="text-2xl font-black tracking-tight uppercase font-serif italic text-neutral-950">Mon - Sat: 12pm - 11pm</p>
               <p className="text-sm font-medium tracking-wide text-red-100">Sunday: 1pm - 10pm</p>
@@ -89,6 +93,17 @@ export default function Main() {
               <span className="text-[10px] font-black uppercase tracking-widest bg-neutral-100 text-neutral-600 px-3 py-1 rounded-full border border-neutral-200">Store Finder</span>
               <span className="text-xl text-red-600">📍</span>
             </div>
+            <p className="mt-4 text-sm text-neutral-600 italic">
+  Follow the aroma of freshly prepared chicken to your neighbourhood favourite.
+</p>
+<Link
+  href="/contact"
+  className="mt-3 inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest text-red-600 hover:text-neutral-950 transition-colors"
+>
+  Get Directions &amp; Visit Us
+  <ArrowUpRight className="h-4 w-4" />
+</Link>
+
             <div className="space-y-1">
               <h3 className="text-xl font-black text-neutral-950 tracking-tight uppercase">135, Wennington Road</h3>
               <p className="text-xs text-neutral-500 font-semibold tracking-wide uppercase">Rainham, London · RM13 9TR</p>

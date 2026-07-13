@@ -25,7 +25,7 @@ export default function Page() {
    <div className="min-h-screen bg-neutral-50 text-neutral-900 font-sans antialiased scroll-smooth">
       
       {/* 1. Organized Header Navigation Section */}
-      <Navibar />
+     
 
       {/* 2. Organized Hero Component */}
       <Main />

@@ -1,66 +1,78 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UseSiteContext } from "@/SiteContext/SiteContext";
 import dynamic from "next/dynamic";
-import Navbar from "@/components/level-2/Navbar";
-import Login from "../../components/buttons/Login";
-import { LanguageSwitcher } from "../../languages/LanguageSwitcher";
-
-export const headerFlags = {
-  SHOW_LANGUAGE_SWITCHER: process.env.NEXT_PUBLIC_SHOW_LANGUAGE_SWITCHER === "1",
-  SHOW_LOGIN_BUTTON: process.env.NEXT_PUBLIC_SHOW_LOGIN_BUTTON === "1",
-};
+import Link from "next/link";
+  import { useRouter } from "next/navigation";
 
 const FaBars = dynamic(
   () => import("react-icons/fa6").then((mod) => mod.FaBars),
   { ssr: false }
 );
 
-const Header = () => {
-  const { bargerMenuToggle } = UseSiteContext();
-  const [hasMounted, setHasMounted] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+export default function Header() {
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setHasMounted(true);
+ 
 
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50); // 👈 when scroll > 50px -> header appears
-    };
+const router = useRouter();
 
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  if (!hasMounted) return null;
+  useEffect(() => setMounted(true), []);
+ 
+  if (!mounted) return null;
 
   return (
-    <header
-      className={`w-full fixed top-0 z-50 transition-all duration-300 
-        ${scrolled ? "bg-white shadow-sm text-slate-5" : "bg-transparent shadow-none text-slate-400"}
-      `}
-    >
-      <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-12  flex items-center justify-between">
-        <div className="">
-          {/* <button
-            onClick={() => bargerMenuToggle(false)}
-            className="lg:hidden p-2 rounded-md header-toggle-hover"
-            aria-label="Toggle menu"
-          > */}
-            <FaBars size={28} />
-          {/* </button> */}
-          {/* <Navbar /> */}
-        </div>
+    <nav className="bg-white border-b border-neutral-200/80 sticky top-0 z-50 shadow-sm backdrop-blur-md">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-20 items-center">
+          
+          {/* Brand Logo Anchor Slot */}
+          <div 
+            onClick={() => router.push("/")}
+            className="flex flex-col cursor-pointer select-none"
+          >
+            <span className="text-xl font-black tracking-tighter text-neutral-950 uppercase leading-none">
+              K'S CHICKEN
+            </span>
+            <span className="text-[8px] font-bold tracking-[0.35em] text-red-600 uppercase mt-1">
+              Fried · Grilled · Delicious
+            </span>
+          </div>
 
-        <div className="flex items-center gap-3">
-          {headerFlags.SHOW_LANGUAGE_SWITCHER && <LanguageSwitcher />}
-          {headerFlags.SHOW_LOGIN_BUTTON && <Login />}
+          {/* Desktop Link Pill Modules */}
+          <div className="hidden md:flex space-x-10 text-xs font-bold uppercase tracking-wider text-neutral-600">
+ <button
+    onClick={() => router.push("/menu")}
+  className="hover:text-red-600 transition-colors cursor-pointer focus:outline-none"
+>
+  Digital Menu
+</button>
+            <button 
+              // onClick={() => scrollToSection("combo-deals")} 
+              className="hover:text-red-600 transition-colors cursor-pointer focus:outline-none"
+            >
+              Sharing Deals
+            </button>
+            <button 
+              // onClick={() => scrollToSection("location")} 
+              className="hover:text-red-600 transition-colors cursor-pointer focus:outline-none"
+            >
+              Store Info
+            </button>
+          </div>
+
+          {/* Hotline CTA Module Link */}
+          <div className="hidden md:flex">
+            <a 
+              href="tel:01708780264" 
+              className="bg-red-600 text-white text-xs font-black uppercase tracking-widest px-5 py-3.5 rounded-xl hover:bg-neutral-950 transition-all duration-300 shadow-sm focus:outline-none"
+            >
+              📞 01708 780264
+            </a>
+          </div>
+
         </div>
       </div>
-    </header>
+    </nav>
   );
-};
-
-export default Header;
+}
