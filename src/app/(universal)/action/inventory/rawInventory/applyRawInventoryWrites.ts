@@ -1,16 +1,24 @@
 "use server";
 
-import admin from "firebase-admin";
+ 
 import { adminDb } from "@/lib/firebaseAdmin";
-
+import { RawInventoryUpdate } from "@/lib/types/inventory/RawInventoryUpdateType";
+import { InventoryLedgerType } from "@/lib/types/inventory/InventoryLedgerType";
+import admin from "firebase-admin";
 
 export async function applyRawInventoryWrites(
   tx: FirebaseFirestore.Transaction,
-  updates: any[],
-  orderId: string
+  updates: RawInventoryUpdate[],
+  orderId: string,
+  type: string,
+  direction: "OUT" | "IN" = "OUT",
+  note: string = "Consumed in production",
+  createdBy: string = "system",
+  source: string = "PRODUCTION",
 ) {
-  const now = admin.firestore.FieldValue.serverTimestamp();
+ const now = admin.firestore.FieldValue.serverTimestamp();
 
+  //console.log('tr updates-------------------------',updates)
   let totalRawMaterialCost = 0;
 
   for (const u of updates) {
@@ -19,18 +27,18 @@ export async function applyRawInventoryWrites(
     // =====================================
 
     const consumedValue =
-      (Number(u.quantity) || 0) *
+      (Number(u.sendQty) || 0) *
       (Number(u.unitCost) || 0);
 
     totalRawMaterialCost += consumedValue;
 
     const newStockValue = Math.max(
       0,
-      (Number(u.stockValue) || 0) - consumedValue
+      (Number(u.storeStockValue) || 0) - consumedValue
     );
 
     tx.update(u.ref, {
-      currentStock: u.next,
+      currentStock: u.afterStock,
       stockValue: Number(newStockValue.toFixed(2)),
       updatedAt: now,
     });
@@ -42,47 +50,58 @@ export async function applyRawInventoryWrites(
     const ledgerRef =
       adminDb.collection("stockLedgerInventory").doc();
 
-    tx.set(ledgerRef, {
-      transactionId: ledgerRef.id,
+ const ledger: InventoryLedgerType = {
+  transactionId: ledgerRef.id,
 
-      inventoryItemId: u.inventoryItemId,
-      inventoryItemName: u.itemName,
+  // INVENTORY ITEM
+  inventoryItemId: u.inventoryItemId,
+  inventoryItemName: u.inventoryItemName,
 
-      supplierId: "",
-      supplierName: "",
+  // PARTY
+  partyId: "",
+  partyName: "",
+  partyType: "SYSTEM",
 
-      type: "CONSUMPTION",
-      direction: "OUT",
+  // PURCHASE
+  purchaseQuantity: 0,
+  purchaseUnit: u.purchaseUnit,
+  purchaseUnitCost: 0,
 
-      purchaseQuantity: 0,
-      purchaseUnit: u.purchaseUnit || "",
-      purchaseUnitCost: 0,
+  // TRANSACTION
+  conversionFactor: u.conversionFactor,
+  transactionQuantity: u.sendQty,
+  transactionUnit: u.transactionUnit,
+  transactionUnitCost: u.unitCost,
 
-      conversionFactor: u.conversionFactor,
+  // STOCK
+  beforeStock: u.beforeStock, 
+  afterStock: u.afterStock,
 
-      quantity: u.quantity || 0,
-      unit: u.transactionUnit,
+  // VALUE
+  totalAmount: Number(consumedValue.toFixed(2)),
 
-      unitCost: u.unitCost,
+  // PAYMENT
+  paidAmount: 0,
+  dueAmount: 0,
+  paymentStatus: null,
+  paymentMethod: null,
 
-      beforeStock: u.prev,
-      afterStock: u.next,
+  // TRANSACTION INFO
+  referenceType: "PRODUCTION",
+  referenceId: orderId,
 
-      totalAmount: Number(consumedValue.toFixed(2)),
-      paidAmount: 0,
-      dueAmount: 0,
-      paymentStatus: null,
-      paymentMethod: null,
+  type,
+  direction,
+  note,
 
-      referenceType: "PRODUCTION",
-      referenceId: orderId,
+  // AUDIT
+  createdById: createdBy,
+  sourceModule: source,
 
-      note: "Consumed in production",
-      createdBy: "system",
-      source: "PRODUCTION",
+  createdAt: now,
+};
 
-      createdAt: now,
-    });
+tx.set(ledgerRef, ledger);
   }
 
   return Number(totalRawMaterialCost.toFixed(2));

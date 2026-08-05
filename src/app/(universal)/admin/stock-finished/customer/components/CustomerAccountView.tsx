@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 
 import { X, Wallet } from "lucide-react";
+import Link from "next/link";
 
 export default function CustomerAccountView({
   account,
@@ -99,15 +100,86 @@ export default function CustomerAccountView({
     );
   };
 
+  const [savingOpeningBalance, setSavingOpeningBalance] =
+    useState(false);
+
+  const handleOpeningBalance = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const openingBalance = Number(
+      formData.get("openingBalance") || 0
+    );
+
+    if (Number.isNaN(openingBalance)) {
+      alert("Please enter a valid opening balance.");
+      return;
+    }
+
+    try {
+      setSavingOpeningBalance(true);
+
+      const res = await fetch(
+        "/api/customer-opening-balance",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customerId,
+            openingBalance,
+          }),
+        }
+      );
+
+      const json = await res.json();
+
+      if (!json.success) {
+        throw new Error(
+          json.message || "Failed to save opening balance."
+        );
+      }
+
+      alert("Opening balance saved successfully.");
+
+      window.location.reload();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setSavingOpeningBalance(false);
+    }
+  };
+
 
 
   return (
     <div className=" space-y-4">
-      <h2 className="text-lg font-semibold">
-        {account.wholeSaleCutomerName || "Customer Account"}
-      </h2>
+      <div className="flex justify-between">
+        <h2 className="text-lg font-semibold">
+          {account.wholeSaleCutomerName || "Customer Account"}
+        </h2>
+        <div className="flex gap-3">
+          <Link
+            href={`/admin/stock-finished/customer/ledger/adjust/${customerId}`}
+            className="rounded-lg bg-amber-600 px-3 py-2 text-white"
+          >
+            Adjust Balance
+          </Link>
+          <Link
+            href={`/admin/stock-finished/customer/ledger/opening-balance/${customerId}`}
+            className="rounded-lg bg-slate-600 px-3 py-2 text-white hover:bg-slate-700"
+          >
+            Opening Balance
+          </Link>
 
 
+        </div>
+      </div>
 
       {/* ================= SUMMARY ================= */}
       <div className="grid grid-cols-10 gap-4">
@@ -115,24 +187,24 @@ export default function CustomerAccountView({
 
         <div className="flex justify-between gap-2 p-3 bg-gray-200 rounded-xl col-span-2">
           <div>
-            <p className="text-sm font-medium text-zinc-500">
+            {/* <p className="text-sm font-medium text-zinc-500">
               Total Sales
-            </p>
+            </p> */}
 
-            <p
+            {/* <p
               className={`text-2xl font-bold tracking-tight ${(account.totalSales ?? 0) > 0
                 ? "text-blue-700"
                 : "text-zinc-700"
                 }`}
             >
               ₹ {(account.totalSales ?? 0).toLocaleString()}
-            </p>
+            </p> */}
           </div>
           <div>
             <div className="grid grid-cols-3 gap-3">
-              <MiniCard title="Cash" value={account.cashPaid} />
+              {/* <MiniCard title="Cash" value={account.cashPaid} />
               <MiniCard title="UPI" value={account.upiPaid} />
-              <MiniCard title="Card" value={account.cardPaid} />
+              <MiniCard title="Card" value={account.cardPaid} /> */}
             </div>
           </div>
 
@@ -140,8 +212,8 @@ export default function CustomerAccountView({
 
         </div>
 
-        <Card title="Total Return" value={account.totalReturn} />
-        <Card title="Total Paid" value={account.totalPaid} />
+        {/* <Card title="Total Return" value={account.totalReturn} />
+        <Card title="Total Paid" value={account.totalPaid} /> */}
         <Card title="Credit" value={account.creditBalance} />
         <div className="p-3 flex justify-between  col-span-2 bg-gray-200 rounded-xl">
           <div className="flex flex-col">
@@ -160,7 +232,7 @@ export default function CustomerAccountView({
               ₹ {balance.toLocaleString()}
             </p>
           </div>
-          {balance > 0 && (
+          {/* {balance > 0 && ( */}
             <button
               onClick={() => setOpenPayment(true)}
               className="  w-fit h-10 px-2 rounded-lg bg-slate-500 text-white text-sm font-medium hover:bg-zinc-600 transition flex items-center justify-center gap-2"
@@ -168,7 +240,7 @@ export default function CustomerAccountView({
               <Wallet className="h-4 w-4" />
               Receive Payment
             </button>
-          )}
+          {/* )} */}
         </div>
 
         <div className="col-span-3">
@@ -276,7 +348,6 @@ export default function CustomerAccountView({
 
 
       </div>
-
 
 
 

@@ -3,6 +3,7 @@
 import admin from "firebase-admin";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { ApplyInventoryTransactionType } from "@/lib/types/ApplyInventoryTransactionType";
+import { InventoryLedgerType } from "@/lib/types/inventory/InventoryLedgerType";
 
 
 
@@ -192,6 +193,8 @@ else if (
             afterStock > 0
                 ? afterStockValue / afterStock
                 : 0;
+
+                
     }
 
     // --------------------------------------
@@ -297,6 +300,8 @@ const removedValue =
     stockValue: afterStockValue,
     averageCost: afterAverageCost,
     costPrice: afterAverageCost,
+    purchaseUnit ,
+    purchaseUnitCost ,
     updatedAt: now,
 });
 
@@ -323,58 +328,158 @@ const removedValue =
     const ledgerRef =
         adminDb.collection("stockLedgerInventory").doc();
 
-    tx.set(ledgerRef, {
-        transactionId: ledgerRef.id,
 
-        inventoryItemId,
-        inventoryItemName: inventory.name || "",
-
-        supplierId: supplierId || "",
-        supplierName: supplierName || "",
-
-        type,
-        direction,
-
-        purchaseQuantity: purchaseQty,
-
-        purchaseUnit:
+        const ledger: InventoryLedgerType = {
+          // =====================================================
+          // DOCUMENT
+          // =====================================================
+          transactionId: ledgerRef.id,
+        
+          // =====================================================
+          // INVENTORY ITEM
+          // =====================================================
+          inventoryItemId,
+          inventoryItemName: inventory.name || "",
+        
+          // =====================================================
+          // PARTY
+          // =====================================================
+          partyId: supplierId || "",
+          partyName: supplierName || "",
+          partyType: supplierId ? "SUPPLIER" : "SYSTEM",
+        
+          // =====================================================
+          // PURCHASE DETAILS
+          // =====================================================
+          purchaseQuantity: purchaseQty,
+        
+          purchaseUnit:
             purchaseUnit ||
             inventory.purchaseUnit ||
             inventory.consumptionUnit,
-
-        purchaseUnitCost: isCostMovement
+        
+          purchaseUnitCost: isCostMovement
             ? (purchaseUnitCost ?? finalUnitCost)
             : 0,
-
-        conversionFactor:
+        
+          // =====================================================
+          // TRANSACTION DETAILS
+          // =====================================================
+          conversionFactor:
             conversionFactor ??
             inventory.conversionFactor ??
             1,
-
-        quantity,
-        unit:
+        
+          transactionQuantity: quantity,
+        
+          transactionUnit:
             inventory.consumptionUnit || "pcs",
+        
+          transactionUnitCost: finalUnitCost,
+        
+          // =====================================================
+          // STOCK
+          // =====================================================
+          beforeStock,
+          afterStock,
+        
+          // =====================================================
+          // VALUE
+          // =====================================================
+          totalAmount: isCostMovement ? totalAmount : 0,
+        
+          // =====================================================
+          // PAYMENT
+          // =====================================================
+          paidAmount: isCostMovement ? paidAmount : 0,
+          dueAmount: isCostMovement ? dueAmount : 0,
+        
+          paymentStatus: isCostMovement
+            ? paymentStatus
+            : null,
+        
+          paymentMethod: isCostMovement
+            ? paymentMethod
+            : null,
+        
+          // =====================================================
+          // TRANSACTION INFO
+          // =====================================================
+          referenceType,
+          referenceId,
+        
+          type,
+          direction,
+        
+          note,
+        
+          // =====================================================
+          // SOURCE
+          // =====================================================
+          sourceModule: source,
+        
+          // =====================================================
+          // AUDIT
+          // =====================================================
+          createdById: createdBy,
+        
+          createdAt: now,
+        };
+        
+        tx.set(ledgerRef, ledger);
 
-        unitCost: finalUnitCost,
+    // tx.set(ledgerRef, {
+    //     transactionId: ledgerRef.id,
 
-        beforeStock,
-        afterStock,
+    //     inventoryItemId,
+    //     inventoryItemName: inventory.name || "",
 
-        totalAmount: isCostMovement ? totalAmount : 0,
-        paidAmount: isCostMovement ? paidAmount : 0,
-        dueAmount: isCostMovement ? dueAmount : 0,
-        paymentStatus: isCostMovement ? paymentStatus : null,
-        paymentMethod: isCostMovement ? paymentMethod : null,
+    //     supplierId: supplierId || "",
+    //     supplierName: supplierName || "",
 
-        referenceType,
-        referenceId,
+    //     type,
+    //     direction,
 
-        note,
-        createdBy,
+    //     purchaseQuantity: purchaseQty,
 
-        createdAt: now,
-        source,
-    });
+    //     purchaseUnit:
+    //         purchaseUnit ||
+    //         inventory.purchaseUnit ||
+    //         inventory.consumptionUnit,
+
+    //     purchaseUnitCost: isCostMovement
+    //         ? (purchaseUnitCost ?? finalUnitCost)
+    //         : 0,
+
+    //     conversionFactor:
+    //         conversionFactor ??
+    //         inventory.conversionFactor ??
+    //         1,
+
+    //     quantity,
+    //     unit:
+    //         inventory.consumptionUnit || "pcs",
+
+    //     unitCost: finalUnitCost,
+
+    //     beforeStock,
+    //     afterStock,
+
+    //     totalAmount: isCostMovement ? totalAmount : 0,
+    //     paidAmount: isCostMovement ? paidAmount : 0,
+    //     dueAmount: isCostMovement ? dueAmount : 0,
+    //     paymentStatus: isCostMovement ? paymentStatus : null,
+    //     paymentMethod: isCostMovement ? paymentMethod : null,
+
+    //     referenceType,
+    //     referenceId,
+
+    //     note,
+    //     createdBy,
+
+    //     createdAt: now,
+    //     source,
+    // });
 
     return {
         beforeStock,

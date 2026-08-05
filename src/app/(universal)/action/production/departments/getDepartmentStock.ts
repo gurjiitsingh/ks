@@ -1,25 +1,13 @@
 "use server";
 
 import { adminDb } from "@/lib/firebaseAdmin";
+import { DepartmentStockType } from "@/lib/types/department/DepartmentStockType";
 
-export type DepartmentStock = {
-  inventoryItemId: string;
-  inventoryItemName: string;
 
-  quantity: number;
-
-  averageCost: number;
-
-  purchaseUnit: string;
-  consumptionUnit: string;
-  conversionFactor: number;
-
-  updatedAt: number;
-};
 
 export async function getDepartmentStock(
   departmentId: string
-): Promise<DepartmentStock[]> {
+): Promise<DepartmentStockType[]> {
   try {
     const snapshot = await adminDb
       .collection("departmentStock")
@@ -30,17 +18,18 @@ export async function getDepartmentStock(
       const data = doc.data();
 
       return {
+        id: doc.id,
         inventoryItemId: data.inventoryItemId ?? "",
         inventoryItemName: data.inventoryItemName ?? "",
 
         quantity: Number(data.quantity ?? 0),
-
+        currentStock: Number(data.currentStock ?? 0),
         averageCost: Number(data.averageCost ?? 0),
-
+          stockValue: Number(data.stockValue),
         purchaseUnit: data.purchaseUnit ?? "",
         consumptionUnit: data.consumptionUnit ?? "",
         conversionFactor: Number(data.conversionFactor ?? 1),
-
+        purchaseUnitCost: Number(data.purchaseUnitCost ?? 0),
         updatedAt:
           data.updatedAt &&
           typeof data.updatedAt.toMillis === "function"

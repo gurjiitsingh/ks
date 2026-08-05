@@ -12,8 +12,7 @@ import { useForm } from "react-hook-form";
 import { Search, Package2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-import { adjustInventoryStock } from "@/app/(universal)/action/inventory/adjustInventoryStock";
+ 
 import { SupplierType } from "@/lib/types/SupplierType";
 
 import {
@@ -23,8 +22,11 @@ import {
 import { InventoryTransactionNameType } from "@/lib/types/InventoryTransactionType";
 import { PaymentStatus } from "@/lib/types/PaymentStatus";
 import { displayStock } from "@/utils/inventory/displayStock";
+import { purchaseStock } from "@/app/(universal)/action/inventory/purchaseStock";
+import { PaymentMethodType } from "@/lib/types/distribution/PaymentMethodType";
+ 
 
-type PaymentMethod = "CASH" | "UPI" | "CARD";
+ 
 
 type FormType = {
   inventoryItemId: string;
@@ -42,7 +44,7 @@ type FormType = {
   unitCost: number;
   totalAmount: number; // NEW
   paymentStatus: PaymentStatus; // 
-  paymentMethod?: PaymentMethod;
+  paymentMethod?: PaymentMethodType;
   paidAmount?: number;          // 
   //dueAmount?: number;
   note: string;
@@ -118,7 +120,7 @@ export default function StockPurchaseForm({
   const unitCost = watch("unitCost", 0);
   const totalAmount = watch("totalAmount", 0);
 
-  const transactionUnit = watch("transactionUnit", "pcs");
+  const transactionUnit = watch("transactionUnit", "gm");
 
   const paymentStatus = watch("paymentStatus", "PAID");
 
@@ -355,7 +357,7 @@ if (mapping) {
 
 
     try {
-      const result = await adjustInventoryStock({
+      const result = await purchaseStock({
         inventoryItemId: data.inventoryItemId,
 
         supplierId: data.supplierId,
@@ -374,11 +376,11 @@ if (mapping) {
         unitCost: finalUnitCost,
 
         // ORIGINAL
-        purchaseQuantity: originalQuantity,
+        purchaseQuantity: originalQuantity || 0,
 
-        purchaseUnit: data.transactionUnit,
+        purchaseUnit: data.transactionUnit || "kg",
 
-        purchaseUnitCost: originalUnitCost,
+        purchaseUnitCost: originalUnitCost || 1,
 
        conversionFactor:
   mapping?.factor || 1,

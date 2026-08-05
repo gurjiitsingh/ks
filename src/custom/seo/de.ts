@@ -1,7 +1,7 @@
 export const SEO = {
-  title: "Masala – Indisches Restaurant in Gifhorn, Niedersachsen",
+  title: "",
   description:
-    "Genießen Sie authentische indische Küche bei Masala in Gifhorn. Jetzt online bestellen oder vor Ort besuchen.",
+    " ",
 };
 
 

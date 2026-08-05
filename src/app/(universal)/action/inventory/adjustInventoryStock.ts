@@ -1,7 +1,6 @@
 "use server";
-// update raw inventory and raw invenotrory transacitons
-import admin from "firebase-admin";
 
+import admin from "firebase-admin";
 import { adminDb } from "@/lib/firebaseAdmin";
 
 import {
@@ -9,375 +8,252 @@ import {
   revalidateTag,
 } from "next/cache";
 
-
-
-
-
 import { PaymentStatus } from "@/lib/types/PaymentStatus";
 import { InventoryTransactionNameType } from "@/lib/types/InventoryTransactionType";
-import { applyInventoryMovement } from "./applyInventoryMovement";
-import { applySupplierTransaction } from "../inventorySupplier/applySupplierTransaction";
-import { updateSupplierAccount } from "../inventorySupplier/updateSupplierAccount";
-
-type PaymentMethod =
-  | "CASH"
-  | "UPI"
-  | "CARD";
+import { inventoryAdjust } from "./inventoryAdjust";
+import { PaymentMethodType } from "@/lib/types/distribution/PaymentMethodType";
 
 type AdjustInventoryStockType = {
   inventoryItemId: string;
 
-  supplierId?: string;
-  supplierName?: string;
   type: InventoryTransactionNameType;
+supplierId?:string;
+supplierName?:string;
+  direction: "IN" | "OUT";
 
-  direction:
-  | "IN"
-  | "OUT";
-
-  // =====================================
-  // INTERNAL STOCK VALUES (consumption)
-  // =====================================
-
+  // INTERNAL (consumption unit)
   quantity: number;
-stockValue?: number;
   unitCost: number;
-
-  // =====================================
-  // ORIGINAL USER INPUT VALUES
-  // =====================================
-
+  stockValue?: number;
+paidAmount?: number;
+dueAmount?: number;
+  // USER INPUT (purchase unit)
   purchaseQuantity?: number;
-
   purchaseUnit?: string;
-
   purchaseUnitCost?: number;
-
   conversionFactor?: number;
-
+paymentMethod?:PaymentMethodType;
   paymentStatus: PaymentStatus;
 
-  paymentMethod?: PaymentMethod;
-
-  paidAmount?: number;
-  dueAmount?: number;
   note?: string;
-
   createdBy?: string;
 
   referenceId?: string;
 
-  referenceType?:
-  | "PURCHASE"
-  | "MANUAL";
+  referenceType?: "MANUAL";
 };
-
 
 export async function adjustInventoryStock({
   inventoryItemId,
-  supplierId,
-  supplierName,
+
   type,
   direction,
+
   quantity,
   unitCost,
+  stockValue,
 
   purchaseQuantity,
   purchaseUnit,
   purchaseUnitCost,
   conversionFactor,
-  stockValue,
+paymentMethod,
   paymentStatus,
-  paymentMethod,
-  paidAmount: paidAmountInput,
-  //dueAmount,
+
   note,
   createdBy,
+
   referenceId,
   referenceType = "MANUAL",
 }: AdjustInventoryStockType) {
- 
+  console.log("========== adjustInventoryStock ==========");
 
+  console.log("inventoryItemId:", inventoryItemId);
+  console.log("type:", type);
+  console.log("direction:", direction);
+
+  console.log("quantity:", quantity);
+  console.log("unitCost:", unitCost);
+
+  console.log("purchaseQuantity:", purchaseQuantity);
+  console.log("purchaseUnit:", purchaseUnit);
+  console.log("purchaseUnitCost:", purchaseUnitCost);
+  console.log("conversionFactor:", conversionFactor);
+
+  console.log("paymentStatus:", paymentStatus);
+
+  console.log("note:", note);
+  console.log("createdBy:", createdBy);
+
+  console.log("referenceId:", referenceId);
+  console.log("referenceType:", referenceType);
+
+  console.log("stockValue:", stockValue);
+
+  console.log("==========================================");
 
   try {
+    // =====================================================
+    // VALIDATION
+    // =====================================================
+
     if (!inventoryItemId) {
-      return { success: false, message: "Inventory item required" };
+      return {
+        success: false,
+        message: "Inventory item required",
+      };
     }
 
-   if (type !== "CLEAR" && quantity <= 0) {
-  return {
-    success: false,
-    message: "Quantity must be greater than 0",
-  };
-}
+    if (type !== "CLEAR" && quantity <= 0) {
+      return {
+        success: false,
+        message: "Quantity must be greater than 0",
+      };
+    }
 
-
-
+    // Cost required only when user is adding/replacing stock
+    if (
+      (type === "OPENING_STOCK") ||
+      (type === "ADJUSTMENT" &&
+        direction === "IN")
+    ) {
+      if ((purchaseUnitCost ?? 0) <= 0) {
+        return {
+          success: false,
+          message:
+            "Unit cost must be greater than 0",
+        };
+      }
+    }
 
     await adminDb.runTransaction(async (tx) => {
-
-      
-
-      // ================= GET INVENTORY =================
       const inventoryRef = adminDb
         .collection("inventoryItems")
         .doc(inventoryItemId);
 
-      const inventorySnap = await tx.get(inventoryRef);
-
-
-      // ================= CLEAR STOCK =================
-      if (!inventorySnap.exists) {
-  throw new Error("Inventory item not found");
-}
-// ================= CLEAR STOCK =================
-if (type === "CLEAR") {
-  tx.update(inventoryRef, {
-    currentStock: 0,
-    stockValue: 0,
-    averageCost: 0,
-    costPrice: 0,
-  //  stockStatus: "out_of_stock",
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-
-  return;
-}
+      const inventorySnap =
+        await tx.get(inventoryRef);
 
       if (!inventorySnap.exists) {
-        throw new Error("Inventory item not found");
+        throw new Error(
+          "Inventory item not found"
+        );
       }
 
-      const inventoryData = inventorySnap.data();
+      // =====================================================
+      // CLEAR STOCK
+      // =====================================================
 
-      const previousStock =
-        Number(inventoryData?.currentStock) || 0;
+      if (type === "CLEAR") {
+        tx.update(inventoryRef, {
+          currentStock: 0,
+          stockValue: 0,
+          purchaseUnitCost: 0,
+          averageCost: 0,
+          costPrice: 0,
+          updatedAt:
+            admin.firestore.FieldValue.serverTimestamp(),
+        });
 
-      const needsSupplier =
-        type === "PURCHASE" ||
-        type === "SUPPLIER_RETURN";
+        return;
+      }
 
-      const needsPayment =
-        type === "PURCHASE";
+      const inventoryData =
+        inventorySnap.data();
 
-      const needsCost =
-        type === "PURCHASE" ||
-        type === "SUPPLIER_RETURN";
+      let averageCost = 0;
+      let totalAmount = 0;
 
-      const needsSupplierLedger =
-        type === "PURCHASE" ||
-        type === "SUPPLIER_RETURN";
+      switch (type) {
+        case "OPENING_STOCK":
+          averageCost = Number(unitCost);
 
-      // ================= SUPPLIER =================
+          totalAmount =
+            Number(stockValue) ||
+            quantity * averageCost;
 
-      let currentBalance = 0;
-      let currentCreditBalance = 0;
-      if (needsSupplier && supplierId) {
-        const supplierRef = adminDb
-          .collection("supplierAccounts")
-          .doc(supplierId);
+          break;
 
-        const supplierSnap = await tx.get(supplierRef);
+        case "ADJUSTMENT":
+          if (direction === "IN") {
+            averageCost = Number(unitCost);
 
-        supplierName =
-          supplierSnap.data()?.supplierName || supplierName || "";
+            totalAmount =
+              Number(stockValue) ||
+              quantity * averageCost;
+          } else {
+            // Use current average cost
+            averageCost = Number(
+              inventoryData?.averageCost || 0
+            );
 
-        currentBalance =
-          Number(supplierSnap.data()?.balance || 0);
+            totalAmount =
+              quantity * averageCost;
+          }
 
-        currentBalance =
-          Number(
-            supplierSnap.data()?.balance || 0
+          break;
+
+        case "WASTAGE":
+          averageCost = Number(
+            inventoryData?.averageCost || 0
           );
 
-        // Save for later
+          totalAmount =
+            quantity * averageCost;
+
+          break;
       }
 
-      // ================= COST =================
-      const averageCost =
-        unitCost ?? Number(inventoryData?.costPrice) ?? 0;
+      // =====================================================
+      // UPDATE INVENTORY
+      // =====================================================
 
-      const shouldApplyCost = needsCost;
-
-
-      const totalAmount =
-        type === "OPENING_STOCK"
-          ? Number(stockValue || 0)
-          : shouldApplyCost
-            ? quantity * averageCost
-            : 0;
-      // ================= PAYMENT =================
-      const isPurchase =
-        needsPayment &&
-        direction === "IN";
-
-      const paymentStatusSafe =
-        paymentStatus || "PAID";
-
-      const paidAmount =
-        isPurchase && paymentStatusSafe === "PAID"
-          ? totalAmount
-          : Number(paidAmountInput || 0);
-
-      const dueAmount = isPurchase
-        ? Math.max(0, totalAmount - paidAmount)
-        : 0;
-
-
-
-      // ================= UPDATE INVENTORY =================
-
-
-      await applyInventoryMovement(tx, {
+      await inventoryAdjust(tx, {
         inventoryItemId,
 
         type,
         direction,
 
         quantity,
-          totalAmount: needsCost
-          ? totalAmount
-          : 0,
 
         unitCost: averageCost,
+        totalAmount,
         stockValue,
+
         purchaseQuantity,
         purchaseUnit,
         purchaseUnitCost,
         conversionFactor,
 
-        supplierId: needsSupplier
-          ? supplierId
-          : undefined,
-
-        supplierName: needsSupplier
-          ? supplierName
-          : undefined,
-
-      
-
-        paidAmount: needsPayment
-          ? paidAmount
-          : 0,
-
-        dueAmount: needsPayment
-          ? dueAmount
-          : 0,
-
-        paymentStatus: needsPayment
-          ? paymentStatusSafe
-          : "PAID",
-
-        paymentMethod: needsPayment
-          ? paymentMethod
-          : undefined,
-
         referenceType,
         referenceId,
 
-        note: note || "Manual inventory adjustment",
-        createdBy: createdBy || "admin",
+        note,
+        createdBy,
 
         source: "WEB_ADMIN",
       });
-      if (needsSupplierLedger && supplierId) {
-        await updateSupplierAccount(tx, {
-          supplierId,
-          supplierName,
-
-          type:
-            type === "PURCHASE"
-              ? "PURCHASE"
-              : type === "SUPPLIER_RETURN"
-                ? "SUPPLIER_RETURN"
-                : "PAYMENT",
-
-          totalAmount,
-          paidAmount,
-          dueAmount,
-
-          creditAmount:
-            type === "SUPPLIER_RETURN"
-              ? totalAmount
-              : 0,
-
-          currentBalance,
-          currentCreditBalance,
-
-          paymentMethod,
-        });
-      }
-      if (needsSupplierLedger && supplierId) {
-        await applySupplierTransaction(tx, {
-          supplierId,
-          supplierName,
-
-          type:
-            type === "PURCHASE"
-              ? "PURCHASE"
-              : type === "SUPPLIER_RETURN"
-                ? "SUPPLIER_RETURN"
-                : "PAYMENT",
-
-          totalAmount,
-          paidAmount,
-          dueAmount,
-
-          currentBalance,
-
-          paymentMethod,
-
-          referenceType,
-          referenceId,
-
-          note,
-          createdBy,
-
-          source: "WEB_ADMIN",
-        });
-      }
     });
 
-    // ================= CACHE =================
     revalidateTag("inventory-items", "max");
     revalidatePath("/admin/inventory");
     revalidatePath("/admin/inventory/dashboard");
 
     return {
       success: true,
-      message: "Inventory updated successfully",
+      message:
+        "Inventory updated successfully",
     };
   } catch (error) {
-    console.error("❌ adjustInventoryStock failed:", error);
+    console.error(
+      "❌ adjustInventoryStock failed:",
+      error
+    );
 
     return {
       success: false,
-      message: "Failed to update inventory",
+      message:
+        "Failed to update inventory",
     };
   }
 }
-
-
-
-
-
-//  console.log("ad inve---------------------", inventoryItemId,
-//     supplierId,
-//     supplierName,
-//     type,
-//     direction,
-//     quantity,
-//     unitCost,
-
-//     purchaseQuantity,
-//     purchaseUnit,
-//     purchaseUnitCost,
-//     conversionFactor,
-
-//     paymentStatus,
-//     paymentMethod,
-//     paidAmountInput,
-
-//     note,
-//     createdBy,
-//     referenceId,)

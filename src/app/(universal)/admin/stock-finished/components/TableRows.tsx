@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Package2,
+  Sparkles,
 } from "lucide-react";
 
 import { deleteInventoryItem } from "@/app/(universal)/action/stock-finished/dbOperation";
@@ -183,12 +184,12 @@ function TableRows({
 
       <TableCell>
         <span className="capitalize text-sm font-medium text-gray-700">
-          {item.avgCost} Rs
+          {item.avgCost?.toFixed(2)} Rs
         </span>
       </TableCell>
       <TableCell>
         <span className="capitalize text-sm font-medium text-gray-700">
-          {(item.currentStock) * (item.avgCost!)} Rs
+          {((item.currentStock) * (item.avgCost!)).toFixed(2)} Rs
         </span>
       </TableCell>
 
@@ -279,30 +280,27 @@ function TableRows({
       </TableCell>
 
       {/* ACTIONS */}
-      {/* <TableCell className="text-right pr-5">
-        <div className="flex items-center justify-end gap-2">
-         
-          <Link
-            href={`/admin/stock-finished/${item.id}`}
-          >
-            <Button
-              size="sm"
-              className="h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
-            >
-              <CiEdit size={18} />
-            </Button>
-          </Link>
-
-        
+                     <td>
+        <Link
+          href={{
+            pathname: "/admin/stock-finished/estimate-by-name",
+            query: {
+              productId: item.id,
+              currentStock: item.currentStock,
+               consumptionUnit: 'kg',//item.consumptionUnit,
+            },
+          }}
+        >
           <Button
-            onClick={handleDelete}
-            size="sm"
-            className="h-9 rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-sm"
+            size="icon"
+            variant="outline"
+            title="AI Production Estimate"
+            className="border-violet-300 text-violet-700 hover:bg-violet-50"
           >
-            <MdDeleteForever size={18} />
+            <Sparkles size={18} />
           </Button>
-        </div>
-      </TableCell> */}
+        </Link>
+      </td>
     </TableRow>
   );
 }

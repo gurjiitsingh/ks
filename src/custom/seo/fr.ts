@@ -1,7 +1,7 @@
 export const SEO = {
   title: " – ",
   description:
-    "Authentic Indian food at  Gifhorn. Order online for delivery or visit us in Lower Saxony.",
+    "",
 };
 
 

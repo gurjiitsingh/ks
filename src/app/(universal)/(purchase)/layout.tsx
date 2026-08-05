@@ -4,8 +4,8 @@ import SiteLayout from "@/components/SiteLayout";
 import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
-  title: "Welcome to K's Chicken",
-  description: "135, Wennington Road, Rainham RM13 9TR Call us on 01708780264 Your neighbourhood stop for golden fried chicken, wings, burgers, chips and family boxes on Wennington Road.",
+  title: "Food App, Carrer del Segle XX, 9, Horta-Guinardó, 08041 Barcelona, Spain",
+  description: "Carrer del Segle XX, 9, Horta-Guinardó, 08041 Barcelona, Spain",
   other: {
     google: "notranslate",
   },

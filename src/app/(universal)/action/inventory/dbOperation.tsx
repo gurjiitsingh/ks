@@ -58,7 +58,8 @@ export const fetchInventoryItems = cache(
 
   purchaseMappings:
     data.purchaseMappings || [],
-
+purchaseUnit:data.purchaseUnit || "",
+conversionFactor:data.conversionFactor || 1 ,
     
   currentStock:
     Number(data.currentStock) || 0,
@@ -68,12 +69,12 @@ export const fetchInventoryItems = cache(
 
   averageCost:
     Number(data.averageCost) || 0,
-
+purchaseUnitCost:  Number(data.purchaseUnitCost) || 0,
   stockValue:
     Number(data.stockValue) || 0,
 
   sellingPrice:
-    Number(data.sellingPrice) || 0,
+    Number(data.sellingPrice) || 0, 
 
   categoryId:
     data.categoryId || "",

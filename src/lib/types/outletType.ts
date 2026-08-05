@@ -71,7 +71,7 @@ export const outletSchema = z.object({
   isActive: z.boolean(),
 
   // UPI
-  upiId: z
+   upiId: z
     .string()
     .regex(/^[\w.-]+@[\w.-]+$/, "Invalid UPI ID")
     .optional()

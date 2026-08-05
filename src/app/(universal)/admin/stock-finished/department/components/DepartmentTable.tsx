@@ -3,7 +3,7 @@
 import { deleteDepartment } from "@/app/(universal)/action/department/deleteDepartment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 
 type Department = {
   id: string;
@@ -22,6 +22,7 @@ const DepartmentTable = ({
 
 
   const router = useRouter();
+  const [search, setSearch] = useState("");
 
   async function handleDelete(id: string) {
     const confirmDelete = confirm(
@@ -38,28 +39,80 @@ const DepartmentTable = ({
       router.refresh();
     }
   }
+  const filteredDepartments = departments.filter((dep) =>
+    `${dep.name} ${dep.code} ${dep.type} ${dep.managerName || ""}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
   return (
     <div className="p-5">
-      {/* Header */}
+
       {/* Header */}
       <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Departments
-          </h1>
+<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4  ">
 
-          <p className="text-sm text-gray-500">
-            Manage all departments
-          </p>
+  {/* Left: Title */}
+  <div>
+    <h1 className="text-2xl font-bold text-gray-800">
+      Departments
+    </h1>
+
+    <p className="text-sm text-gray-500">
+      Manage all departments
+    </p>
+  </div>
+
+  {/* Right: Search */}
+  <div className="flex items-center gap-2   ">
+
+    <input
+      type="text"
+      placeholder="Search by name, code, type, manager..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="w-full md:w-80 px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+    />
+
+    {search && (
+      <button
+        onClick={() => setSearch("")}
+        className="text-sm text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-lg px-4 py-2 transition"
+      >
+        Clear
+      </button>
+    )}
+
+  </div>
+
+</div>
+
+        <div className="flex gap-4">
+          <Link
+            href="/admin/stock-finished/department/issue-stock/add"
+            className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
+          >
+            Issue Stock
+          </Link>
+          <Link
+            href="/admin/stock-finished/department/return-stock/add"
+            className="inline-flex items-center justify-center rounded-xl bg-slate-400 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
+          >
+            Return Stock to main store
+          </Link>
+          <Link
+            href="/admin/stock-finished/department/transactions"
+            className="inline-flex items-center justify-center rounded-xl bg-[#00897b]  px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
+          >
+            Transactions
+          </Link>
+          <Link
+            href="/admin/stock-finished/department/add"
+            className="inline-flex items-center justify-center rounded-xl bg-amber-500  px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
+          >
+            + Add Department
+          </Link>
         </div>
-
-        <Link
-          href="/admin/stock-finished/department/add"
-          className="inline-flex items-center justify-center rounded-xl bg-[#00897b] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
-        >
-          + Add Department
-        </Link>
       </div>
 
       {/* Table */}
@@ -89,7 +142,7 @@ const DepartmentTable = ({
           </thead>
 
           <tbody>
-            {departments.map((dep) => (
+            {filteredDepartments.map((dep) => (
               <tr
                 key={dep.id}
                 className="border-t hover:bg-gray-50"
@@ -113,8 +166,8 @@ const DepartmentTable = ({
                 <td className="p-3">
                   <span
                     className={`px-2 py-1 rounded text-xs ${dep.isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
                       }`}
                   >
                     {dep.isActive
@@ -125,31 +178,31 @@ const DepartmentTable = ({
 
                 <td className="p-3 text-right font-bold space-x-2 ">
                   <div className="flex gap-6 justify-end">
-                  <Link
-                    href={`/admin/stock-finished/department/department-stock/${dep.id}`}
-                    className="group"
-                  >Stock</Link>
-                  <button
-                    onClick={() =>
-                      router.push(`/admin/departments/edit/${dep.id}`)
-                    }
-                    className="text-blue-600 hover:underline"
-                  >
-                    Edit
-                  </button>
+                    <Link
+                      href={`/admin/stock-finished/department/department-stock/${dep.id}`}
+                      className="group"
+                    >Stock</Link>
+                    <button
+                      onClick={() =>
+                        router.push(`/admin/departments/edit/${dep.id}`)
+                      }
+                      className="text-blue-600 hover:underline"
+                    >
+                      Edit
+                    </button>
 
-                  <button
-                    onClick={() => handleDelete(dep.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Delete
-                  </button>
+                    <button
+                      onClick={() => handleDelete(dep.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>
             ))}
 
-            {departments.length === 0 && (
+            {filteredDepartments.length === 0 && (
               <tr>
                 <td
                   colSpan={6}

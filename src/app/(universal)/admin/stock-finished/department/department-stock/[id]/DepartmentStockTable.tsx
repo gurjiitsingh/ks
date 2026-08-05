@@ -2,22 +2,20 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
+import ReturnToDepartmentDialog from "./ReturnToDepartmentDialog";
+import Link from "next/link";
+import { formatQuantity } from "@/utils/inventory/formatQty";
+import { displayStock } from "@/utils/inventory/displayStock";
+import { DepartmentStockType } from "@/lib/types/department/DepartmentStockType";
 
 type Props = {
-  data: {
-    inventoryItemId: string;
-    inventoryItemName: string;
-    quantity: number;
-    averageCost: number;
-    purchaseUnit: string;
-    consumptionUnit: string;
-    conversionFactor: number;
-    updatedAt: number;
-  }[];
+   departmentName: string; 
+  data: DepartmentStockType[];
 };
 
 export default function DepartmentStockTable({
   data,
+  departmentName,
 }: Props) {
   const [search, setSearch] = useState("");
 
@@ -26,14 +24,34 @@ export default function DepartmentStockTable({
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+   
+
+    const [returnOpen, setReturnOpen] = useState(false);
+
+const [selectedItem, setSelectedItem] = useState<any>(null);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+
+            {/* <ReturnToDepartmentDialog
+        open={returnOpen}
+        onClose={() => {
+          setReturnOpen(false);
+          setSelectedItem(null);
+        }}
+         departmentName={departmentName}
+  item={selectedItem}
+      /> */}
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 p-4">
+
+ <div className="m-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex gap-4 items-center">
         <h2 className="font-semibold text-gray-800">
-          Department Stock
-        </h2>
+  Department Stock -{" "}
+  <span className="text-amber-600">
+    {departmentName}
+  </span>
+</h2>
 
         <div className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
           <Search size={16} className="text-gray-400" />
@@ -47,7 +65,42 @@ export default function DepartmentStockTable({
             }
           />
         </div>
+        </div>
+        <div className="flex gap-4">
+          <Link
+            href="/admin/stock-finished/department/issue-stock/add"
+            className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
+          >
+            Issue Stock
+          </Link>
+
+           <Link
+            href="/admin/stock-finished/department/return-stock/add"
+            className="inline-flex items-center justify-center rounded-xl bg-slate-400 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
+          >
+            Return Stock to main store
+          </Link>
+          <Link
+            href="/admin/stock-finished/department"
+            className="inline-flex items-center justify-center rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
+          >
+            All Departments
+          </Link>
+          <Link
+            href="/admin/stock-finished/department/add"
+            className="inline-flex items-center justify-center rounded-xl bg-[#00897b] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#00796b]"
+          >
+            + Add Department
+          </Link>
+        </div>
       </div>
+
+
+      <div className="flex items-center justify-between border-b border-gray-100 p-4">
+     
+      </div>
+
+
 
       {/* Table */}
       <div className="overflow-x-auto">
@@ -62,9 +115,9 @@ export default function DepartmentStockTable({
                 Quantity
               </th>
 
-              <th className="px-4 py-3 font-medium">
+              {/* <th className="px-4 py-3 font-medium">
                 Unit
-              </th>
+              </th> */}
 
               <th className="px-4 py-3 font-medium text-right">
                 Avg Cost
@@ -73,6 +126,9 @@ export default function DepartmentStockTable({
               <th className="px-4 py-3 font-medium text-right">
                 Stock Value
               </th>
+              {/* <th>
+                Action
+              </th> */}
             </tr>
           </thead>
 
@@ -98,23 +154,56 @@ export default function DepartmentStockTable({
                 </td>
 
                 <td className="px-4 py-3 text-right font-medium">
-                  {item.quantity.toLocaleString("en-IN")}
+                {/* //  {item.quantity.toLocaleString("en-IN")} */}
+
+   <span className="font-medium">
+ 
+
+     {displayStock(
+                item.currentStock!,
+                item.purchaseUnit,
+                item.consumptionUnit,
+                item.conversionFactor
+              )}
+                     
+                      </span>
+
+      
+                  
                 </td>
 
-                <td className="px-4 py-3 text-gray-600">
+                {/* <td className="px-4 py-3 text-gray-600"> 
                   {item.purchaseUnit}
-                </td>
+                </td> */}
 
                 <td className="px-4 py-3 text-right">
                   ₹
-                  {(item.averageCost*item.conversionFactor).toFixed(2)}
+                  {(item.averageCost).toFixed(2)}
                 </td>
 
                 <td className="px-4 py-3 text-right font-semibold text-green-700">
                   ₹
-                  {(item.quantity * item.averageCost*item.conversionFactor).toFixed(
+                  {(item.stockValue!).toFixed(
                     2
                   )}
+                </td>
+                 <td className="px-4 py-3 text-right font-semibold text-green-700">
+                      {/* <button
+        type="button"
+   onClick={() => {
+  setSelectedItem(item);
+  setReturnOpen(true);
+}}
+        className="rounded-lg bg-amber-500 px-3 py-1.5 text-sm text-white hover:bg-amber-600"
+      >
+        Return qty
+      </button>  */}
+      <Link
+  href={`/admin/stock-finished/department/edit-stock/${item.id}`}
+  className="rounded-lg bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700"
+>
+  Edit
+</Link>
                 </td>
               </tr>
             ))}
