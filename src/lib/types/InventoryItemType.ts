@@ -252,13 +252,15 @@ export type InventoryItemType = {
 
   // Default consumption unit
   consumptionUnit: InventoryUnit;
-
+purchaseUnit:string;
+conversionFactor: number;
   // All purchase units for this item
   purchaseMappings: PurchaseMapping[];
 
   currentStock?: number;
   minStock?: number;
 
+  purchaseUnitCost?: number;
   averageCost?: number;
   stockValue?: number;
 
