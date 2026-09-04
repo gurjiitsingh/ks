@@ -82,15 +82,17 @@ const Outlet = () => {
       return;
     }
 
-    if (result.success) {
-      alert(outletId ? "Outlet updated" : "Outlet created");
+if (result.success) {
+  alert(outletId ? "Outlet updated" : "Outlet created");
 
-      setOutletId(result.outletId);
-    } else {
-      console.error(result.errors);
+  if (result.outletId) {
+    setOutletId(result.outletId);
+  }
+} else {
+  console.error(result.errors);
 
-      alert(JSON.stringify(result.errors, null, 2));
-    }
+  alert(JSON.stringify(result.errors, null, 2));
+}
   }
 
   return (
