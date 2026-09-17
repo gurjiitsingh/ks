@@ -19,7 +19,6 @@ import { getDynamicSEO } from "@/lib/seo/getSeo";
 
 
 import FooterWrapper from "@/components/FooterWrapper";
-import Navibar from "../components/Navibar";
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -82,10 +81,10 @@ export default function RootLayout({
                 </div>
 
                 <Header />
- {/* <Navibar /> */}
+
                 {children}
 
-                {/* <FooterWrapper /> */}
+                <FooterWrapper />
 
                 <CartBottomWrapper />
               </div>

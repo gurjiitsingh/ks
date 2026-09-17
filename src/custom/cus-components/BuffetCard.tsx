@@ -58,8 +58,7 @@ export default function BuffetCard() {
               <p></p>
 
               <p></p>
-              <p>135, Wennington Road, Rainham RM13 9TR
-Call us on 01708780264</p>
+              <p>Carrer del Segle XX, 9, Horta-Guinardó, 08041 Barcelona, Spain</p>
 
               <p></p>
               <p></p>

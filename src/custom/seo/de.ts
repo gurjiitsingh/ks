@@ -1,7 +1,7 @@
 export const SEO = {
-  title: "",
+  title: "Masala – Indisches Restaurant in Gifhorn, Niedersachsen",
   description:
-    " ",
+    "Genießen Sie authentische indische Küche bei Masala in Gifhorn. Jetzt online bestellen oder vor Ort besuchen.",
 };
 
 
@@ -12,14 +12,14 @@ export const BRANDING = {
   home_page_disclaimer: "",//"Das Essen kann vom Bild abweichen",
   brand: "Masala",
   tag_line: "Taste of India",
-  brand_name: "",
+  brand_name: "Pizzeria Milano Segle",
 
    poweredBy: "Bereitgestellt von",
   poweredByUrl: "https://www.gstadeveloper.com",
   copyright: {
     prefix: "Urheberrecht ©",
     suffix: "Alle Rechte vorbehalten von",
-    company: "",
+    company: "Pizzeria Milano Segle",
   },
 
 
@@ -30,15 +30,15 @@ export const BRANDING = {
   copyright: {
     prefix: "Copyright ©",
     suffix: "Alle Rechte vorbehalten von",
-    company: "",
+    company: "Pizzeria Milano Segle",
   },
 },
 
 
   // Order complete
   order_complete_heading: "Ihre Bestellung ist abgeschlossen",
-  pickup_time: "",
-  delivery_time: " ",
+  pickup_time: "Abholen: 20–25 Minuten",
+  delivery_time: "Lieferzeit: 40–55 Minuten",
 shop_more_button_order_complete: "Mehr einkaufen",
 
 

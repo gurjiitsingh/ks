@@ -1,4 +1,3 @@
-"use client"
 import { createContext, useContext } from "react";
 //import { cartProductType } from  '@/lib/types/cartProductType'
 //import { cartProductTypeT } from "@/lib/types/cartProductTypeype";

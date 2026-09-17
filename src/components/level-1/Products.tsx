@@ -32,14 +32,14 @@ const [productModifiers, setProductModifiers] = useState<any[]>([]);
 
 
 
-  const cardType = process.env.NEXT_PUBLIC_PRODUCT_CARD_TYPE; 
+  const cardType = process.env.NEXT_PUBLIC_PRODUCT_CARD_TYPE;
 
   //  DYNAMIC IMPORT — SAFE, NO RERENDER LOOP
 
   const Card = useMemo(() => {
     switch (cardType) {
       case "1":
-        return dynamic(() => import("../level-2/CustomProductCard"));
+        return dynamic(() => import("../level-2/ProductCard-h1"));
       case "11":
         return dynamic(() => import("../level-2/ProductCard-h1_1"));
       case "111":

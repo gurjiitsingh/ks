@@ -19,6 +19,7 @@ import {
   MdOutlineInventory2,
   MdOutlineReceiptLong,
   MdOutlineRestaurant,
+  MdStorefront,
 } from "react-icons/md";
 import { FaUsers } from "react-icons/fa";
 import { BsCardList } from "react-icons/bs";
@@ -56,7 +57,9 @@ type SidebarFlagKey =
   | "SHOW_INVENTORY"
   | "SHOW_INVENTORY_TRANSACTIONS"
   | "SHOW_PRODUCT_RECIPES"
-  | "SHOW_MAINTENANCE"; // ⭐ ADD
+  | "SHOW_MAINTENANCE"
+   | "SHOW_PAYROLL"
+  |  "SHOW_STORE_POS"; 
 
 type Titem = {
   key: SidebarFlagKey;
@@ -82,6 +85,7 @@ export const sidebarFlags: Record<SidebarFlagKey, boolean> = {
   SHOW_INVENTORY_RAW: flag(process.env.NEXT_PUBLIC_SHOW_RAW_INVENTORY),
    SHOW_DISTRIBUTION: flag(process.env.NEXT_PUBLIC_SHOW_DISTRIBUTION),
   SHOW_INVENTORY_FINISHED: flag(process.env.NEXT_PUBLIC_SHOW_FINISHED_INVENTORY), 
+  SHOW_PAYROLL: flag(process.env.NEXT_PUBLIC_SHOW_PAYROLL),
   SHOW_VARIANTS: flag(process.env.NEXT_PUBLIC_SHOW_VARIANTS),
   SHOW_COUPON: flag(process.env.NEXT_PUBLIC_SHOW_COUPON),
   SHOW_DELIVERY: flag(process.env.NEXT_PUBLIC_SHOW_DELIVERY),
@@ -96,6 +100,8 @@ export const sidebarFlags: Record<SidebarFlagKey, boolean> = {
     SHOW_MODIFIER: flag(process.env.NEXT_PUBLIC_SHOW_MODIFIER),             
   SHOW_MODIFIER_GROUPS: flag(process.env.NEXT_PUBLIC_SHOW_MODIFIER_GROUPS),
   SHOW_INVENTORY: flag(process.env.NEXT_PUBLIC_SHOW_INVENTORY),
+
+    SHOW_STORE_POS: flag(process.env.NEXT_PUBLIC_SHOW_STORE_POS),
 
 SHOW_INVENTORY_TRANSACTIONS: flag(
   process.env.NEXT_PUBLIC_SHOW_INVENTORY_TRANSACTIONS
@@ -152,7 +158,12 @@ const Sidebar = () => {
     { key: "SHOW_CATEGORIES", name: BRANDING.sidebar.categories, link: "/admin/categories", icon: <MdCategory /> },
     { key: "SHOW_PRODUCTS", name: BRANDING.sidebar.products, link: "/admin/products", icon: <MdInventory /> },
 
-
+   {
+  key: "SHOW_STORE_POS",
+  name: "Store & POS",
+  link: "/admin/store-pos",
+  icon: <MdStorefront />,
+},
 {
   key: "SHOW_INVENTORY_RAW",
   name: "Products Stock",
@@ -170,6 +181,12 @@ const Sidebar = () => {
   name: "Distribution",
   link: "/admin/distribution/load-operator",
   icon: <MdInventory />,
+},
+{
+  key: "SHOW_PAYROLL",
+  name: "Payroll",
+  link: "/admin/payroll",
+  icon: <FaUsers />,
 },
 {
   key: "SHOW_MAINTENANCE",
@@ -203,7 +220,7 @@ const Sidebar = () => {
 
     { key: "SHOW_VARIANTS", name: BRANDING.sidebar.variants, link: "/admin/flavorsProductG", icon: <MdRestaurantMenu /> },
 
-   
+
    
 
 

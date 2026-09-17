@@ -1,7 +1,7 @@
 export const SEO = {
-  title: "Welcome to K's Chicken, 135, Wennington Road, Rainham RM13 9TR Call us on 01708780264",
+  title: "Pizzeria Milano Segle –  Carrer del Segle XX, 9, Horta-Guinardó, 08041 Barcelona, Spain",
   description:
-    "Your neighbourhood stop for golden fried chicken, wings, burgers, chips and family boxes on Wennington Road.",
+    "Authentic food at Pizzeria Milano Segle , Carrer del Segle XX, 9, Horta-Guinardó, 08041 Barcelona, Spain. Order online for delivery ",
 };
 
 
@@ -11,15 +11,15 @@ export const BRANDING = {
   offer_instruction: "",
   delivery_note: "Delivery is also available.",
   home_page_disclaimer:"",// "Food may differ from image.",
-  brand: "",
+  brand: "Pizzeria Milano Segle",
   tag_line: "",
-  brand_name: " ",
+  brand_name: "Pizzeria Milano Segle ",
    poweredBy: "Powered by",
     poweredByUrl: "http://www.gstadeveloper.com",
     copyright: {
       prefix: "Copyright ©",
       suffix: "All Rights Reserved by",
-      company: " "
+      company: "Pizzeria Milano Segle "
     },
 
 
@@ -30,7 +30,7 @@ export const BRANDING = {
   copyright: {
     prefix: "Copyright ©",
     suffix: "All Rights Reserved by",
-    company: " ",
+    company: "Pizzeria Milano Segle ",
   },
 },
 
