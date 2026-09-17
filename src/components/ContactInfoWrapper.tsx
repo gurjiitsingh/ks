@@ -28,34 +28,41 @@ export default async function ContactInfoWrapper() {
               dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day)
           )
           .map((day) => {
-  const formattedDay =
-    day.day.charAt(0).toUpperCase() + day.day.slice(1);
+            const formattedDay =
+              day.day.charAt(0).toUpperCase() + day.day.slice(1);
 
-  if (!day.isOpen) return `${formattedDay}: Closed`;
+            if (!day.isOpen) {
+              return `${formattedDay}: Closed`;
+            }
 
-  const isFullDay =
-    day.fullDay &&
-    day.amOpen === "00:00" &&
-    day.pmOpen === "00:00";
+            const isFullDay =
+              day.fullDay &&
+              day.amOpen === "00:00" &&
+              day.pmOpen === "00:00";
 
-  if (isFullDay) return `${formattedDay}: Open 24h`;
+            if (isFullDay) {
+              return `${formattedDay}: Open 24h`;
+            }
 
-  const am =
-    day.amOpen !== "00:00" && day.amClose !== "00:00"
-      ? `${day.amOpen} - ${day.amClose}`
-      : null;
+            const am =
+              day.amOpen !== "00:00" && day.amClose !== "00:00"
+                ? `${day.amOpen} - ${day.amClose}`
+                : null;
 
-  const pm =
-    day.pmOpen !== "00:00" && day.pmClose !== "00:00"
-      ? `${day.pmOpen} - ${day.pmClose}`
-      : null;
+            const pm =
+              day.pmOpen !== "00:00" && day.pmClose !== "00:00"
+                ? `${day.pmOpen} - ${day.pmClose}`
+                : null;
 
-  const time = [am, pm].filter(Boolean).join(", ");
+            const time = [am, pm].filter(Boolean).join(", ");
 
-  return `${formattedDay}: ${time || "Closed"}`;
-});
+            return `${formattedDay}: ${time || "Closed"}`;
+          });
 
   return (
-    <ContactInfo outlet={outlet} schedule={formattedSchedule} />
+    <ContactInfo
+      outlet={outlet}
+      schedule={formattedSchedule}
+    />
   );
-}
+} 
