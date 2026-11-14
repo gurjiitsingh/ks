@@ -324,12 +324,12 @@ export async function loadVehicle({
           );
         }
 
-        if (availableQty < requestedQty) {
-          throw new Error(
-            `${row.factory.productName} has insufficient stock. ` +
-            `Available: ${availableQty}, Required: ${requestedQty}`
-          );
-        }
+        // if (availableQty < requestedQty) {
+        //   throw new Error(
+        //     `${row.factory.productName} has insufficient stock. ` +
+        //     `Available: ${availableQty}, Required: ${requestedQty}`
+        //   );
+        // }
       }
 
       // =================================================
@@ -446,7 +446,7 @@ export async function loadVehicle({
             vehicleId,
 
           remarks,
-
+ saleDate: "",
           createdBy,
         });
 

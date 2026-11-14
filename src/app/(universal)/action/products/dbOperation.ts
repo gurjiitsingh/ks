@@ -90,7 +90,7 @@ export const fetchProducts = unstable_cache(
 
           discountPrice:
             data.discountPrice ?? 0,
-
+          discountEligible: data.discountEligible ?? true,
           categoryId:
             data.categoryId ?? "",
 
@@ -142,7 +142,7 @@ export const fetchProducts = unstable_cache(
           isFeatured:
             data.isFeatured ?? false,
 
-            favorite:
+          favorite:
             data.favorite ?? false,
 
           purchaseSession:
@@ -163,6 +163,15 @@ export const fetchProducts = unstable_cache(
 
           taxType:
             data.taxType,
+
+            taxCategory:
+  data.taxCategory ?? "FOOD_GST",
+
+taxRate1:
+  data.taxRate1 ?? 0,
+
+taxType1:
+  data.taxType1 ?? "exclusive",
         };
       });
     } catch (error) {
@@ -196,6 +205,7 @@ export async function addNewProduct(formData: FormData) {
     // FINAL, SAFE conversion
     const hasVariants = rawHasVariants === "true";
     const type = formData.get("type") as string;
+    const taxCategory = formData.get("taxCategory") as string;
     const parentId = formData.get("parentId") as string;
     const featured_img = formData.get("isFeatured") === "true";
     const name = formData.get("name") as string;
@@ -215,12 +225,15 @@ export async function addNewProduct(formData: FormData) {
     //  New tax fields
     const taxRateRaw = formData.get("taxRate") as string | null;
     const taxType = formData.get("taxType") as string | null;
+    const taxRateRaw1 = formData.get("taxRate1") as string | null;
+    const taxType1 = formData.get("taxType1") as string | null;
     const searchCode = formData.get("searchCode") as string | null;
     const currentStock = currentStockRaw ? parseInt(currentStockRaw, 10) : null;
     const priceF = parseFloat(price.replace(/,/g, ".")) || 0;
     const discountPriceF = parseFloat(discountPrice.replace(/,/g, ".")) || 0;
     const sortOrderN = parseInt(sortOrder || "0", 10);
     const taxRate = taxRateRaw ? parseFloat(taxRateRaw) : null;
+    const taxRate1 = taxRateRaw1 ? parseFloat(taxRateRaw1) : null;
     const masterCategoryId = formData.get("masterCategoryId") as string | null;
     const productMode =
       (formData.get("productMode") as string) || "finished_stock";
@@ -240,13 +253,14 @@ export async function addNewProduct(formData: FormData) {
       masterCategoryName =
         masterCategoryDoc.data()?.name || "";
     }
-
+    console.log("te------------------------", taxCategory)
     const receivedData = {
       name,
       searchCode,
       price: priceF,
       discountPrice: discountPriceF,
       currentStock,
+      taxCategory,
       sortOrder: sortOrderN,
       categoryId,
       masterCategoryId,
@@ -256,6 +270,8 @@ export async function addNewProduct(formData: FormData) {
       status,
       taxRate,
       taxType,
+      taxRate1,
+      taxType1,
     };
 
     const result = newProductSchema.safeParse(receivedData);
@@ -299,6 +315,7 @@ export async function addNewProduct(formData: FormData) {
       parentId,
       hasVariants,
       type,
+      taxCategory,
       productCat,
       masterCategoryId,
       masterCategoryName,
@@ -312,6 +329,8 @@ export async function addNewProduct(formData: FormData) {
       quantity: null,
       taxRate,
       taxType,
+      taxRate1,
+      taxType1,
       createdAt: new Date().toISOString(),
     };
 
@@ -357,7 +376,7 @@ export async function addNewProduct(formData: FormData) {
       updateProductType(parentId, "parent", true);
     }
 
-    return { 
+    return {
       success: true,
       message: "Product saved successfully",
       id: docRef.id,
@@ -713,7 +732,7 @@ export async function addNewProduct_without_revalidate(formData: FormData) {
       createdAt: new Date().toISOString(),
     };
 
- 
+
 
     //  Save to Firestore
     const docRef = await adminDb.collection("products").add(data);
@@ -726,7 +745,7 @@ export async function addNewProduct_without_revalidate(formData: FormData) {
     console.error("❌ Firestore add failed:", error);
     return { errors: { general: "Could not save product" } };
   }
-} 
+}
 
 export async function fetchProductById(
   id: string
@@ -759,6 +778,7 @@ export async function fetchProductById(
       sortOrder: data?.sortOrder ?? 0,
       image: data?.image ?? "",
       images: Array.isArray(data?.images) ? data.images : [],
+      options: Array.isArray(data?.options) ? data.options : [],
       isFeatured: data?.isFeatured ?? false,
       favorite: data?.favorite ?? false,
       purchaseSession: data?.purchaseSession ?? null,
@@ -769,6 +789,14 @@ export async function fetchProductById(
       //  New GST / Tax Fields (safe fallbacks)
       taxRate: data?.taxRate ?? null,
       taxType: data?.taxType ?? null,
+      taxCategory:
+  data?.taxCategory ?? "FOOD_GST",
+
+taxRate1:
+  data?.taxRate1 ?? 0,
+
+taxType1:
+  data?.taxType1 ?? "exclusive",
     };
 
     return product;
@@ -794,50 +822,58 @@ export async function fetchProductByCategoryId(
     }
 
     const products: ProductType[] = querySnapshot.docs.map((doc) => {
-  const data = doc.data();
+      const data = doc.data();
 
-  return {
-    id: doc.id,
-    name: data.name ?? "",
-    price: data.price ?? 0,
-    currentStock: data.currentStock ?? 0,
-    discountPrice: data.discountPrice,
+      return {
+        id: doc.id,
+        name: data.name ?? "",
+        price: data.price ?? 0,
+        currentStock: data.currentStock ?? 0,
+        discountPrice: data.discountPrice,
 
-    categoryId: data.categoryId ?? "",
-    masterCategoryId: data.masterCategoryId ?? "",
-    masterCategoryName: data.masterCategoryName ?? "",
+        categoryId: data.categoryId ?? "",
+        masterCategoryId: data.masterCategoryId ?? "",
+        masterCategoryName: data.masterCategoryName ?? "",
 
-    productCat: data.productCat,
-    baseProductId: data.baseProductId ?? "",
-    productDesc: data.productDesc ?? "",
+        productCat: data.productCat,
+        baseProductId: data.baseProductId ?? "",
+        productDesc: data.productDesc ?? "",
 
-    quantity: 0,
+        quantity: 0,
 
-    // ⭐ REQUIRED BY ProductType
-    favorite: data.favorite ?? false,
+        // ⭐ REQUIRED BY ProductType
+        favorite: data.favorite ?? false,
 
-    sortOrder: data.sortOrder ?? 0,
-    image: data.image ?? "",
-    isFeatured: data.isFeatured ?? false,
-    flavors: data.flavors ?? false,
-    publishStatus: data.publishStatus ?? "draft",
-    stockStatus: data.stockStatus ?? "out_of_stock",
-    searchCode: data.searchCode ?? "",
+        sortOrder: data.sortOrder ?? 0,
+        image: data.image ?? "",
+        isFeatured: data.isFeatured ?? false,
+        flavors: data.flavors ?? false,
+        publishStatus: data.publishStatus ?? "draft",
+        stockStatus: data.stockStatus ?? "out_of_stock",
+        searchCode: data.searchCode ?? "",
 
-    taxRate: data.taxRate,
-    taxType: data.taxType,
+        taxRate: data.taxRate,
+        taxType: data.taxType,
+        taxCategory:
+  data.taxCategory ?? "FOOD_GST",
 
-    purchaseSession: data.purchaseSession ?? null,
+taxRate1:
+  data.taxRate1 ?? 0,
 
-    sku: data.sku,
-    barcode: data.barcode,
-    minStock: data.minStock,
-    productMode: data.productMode,
-    inventoryItemId: data.inventoryItemId,
-    trackInventory: data.trackInventory,
-    allowNegativeStock: data.allowNegativeStock,
-  };
-});
+taxType1:
+  data.taxType1 ?? "exclusive",
+
+        purchaseSession: data.purchaseSession ?? null,
+
+        sku: data.sku,
+        barcode: data.barcode,
+        minStock: data.minStock,
+        productMode: data.productMode,
+        inventoryItemId: data.inventoryItemId,
+        trackInventory: data.trackInventory,
+        allowNegativeStock: data.allowNegativeStock,
+      };
+    });
 
     return products;
   } catch (error) {
@@ -905,9 +941,8 @@ export async function toggleFavorite(
 
     return {
       success: true,
-      message: `Product ${
-        favorite ? "added to favorites" : "removed from favorites"
-      } successfully.`,
+      message: `Product ${favorite ? "added to favorites" : "removed from favorites"
+        } successfully.`,
     };
   } catch (error) {
     console.error(
@@ -945,7 +980,7 @@ export async function uploadProductFromCSV(data: Partial<ProductType>) {
     sortOrder: data.sortOrder !== undefined ? Number(data.sortOrder) : 0,
     image: data.image ?? "",
     isFeatured: String(data.isFeatured).toLowerCase() === "true" ? true : false,
-     favorite: data.favorite ?? false,
+    favorite: data.favorite ?? false,
     purchaseSession: data.purchaseSession ?? null,
     quantity:
       data.quantity !== undefined && data.quantity !== null
@@ -963,6 +998,14 @@ export async function uploadProductFromCSV(data: Partial<ProductType>) {
     //     : undefined,
     taxRate: data.taxRate ?? 0,
     taxType: data.taxType ?? "inclusive",
+    taxCategory:
+  data.taxCategory ?? "FOOD_GST",
+
+taxRate1:
+  data.taxRate1 ?? 0,
+
+taxType1:
+  data.taxType1 ?? "exclusive",
   };
 
   await adminDb.collection("products").add(productData);
@@ -999,78 +1042,7 @@ export async function updateProductType(
 
 
 
-/**
- * Inline update for specific product fields (for editable table rows)
- */
 
-
-
-export async function updateProductField(
-  productId: string,
-  updates: Partial<{
-    name: string;
-    searchCode: string;
-    categoryId: string;
-    price: number;
-    discountPrice: number;
-    taxRate: number;
-    taxType: "inclusive" | "exclusive";
-    currentStock: number;
-    sortOrder: number;
-  }>
-) {
-  try {
-    const productRef = adminDb.collection("products").doc(productId);
-    const productSnap = await productRef.get();
-
-    if (!productSnap.exists) {
-      return { success: false, error: "Product not found" };
-    }
-
-    const safeUpdates: Record<string, any> = {};
-
-    // ✅ Sanitize input
-    for (const key in updates) {
-      const val = updates[key as keyof typeof updates];
-      if (val === undefined || val === null) continue;
-
-      if (["name", "searchCode", "categoryId", "taxType"].includes(key)) {
-        safeUpdates[key] = val;
-        continue;
-      }
-
-      if (typeof val === "string" && !isNaN(Number(val))) {
-        safeUpdates[key] = parseFloat(val);
-      } else {
-        safeUpdates[key] = val;
-      }
-    }
-
-    // ✅ Fetch category name (like old form)
-    if (safeUpdates.categoryId) {
-      try {
-        const categories = await fetchCategories();
-        const matchedCategory = categories.find(
-          (cat) => cat.id === safeUpdates.categoryId
-        );
-        safeUpdates.productCat = matchedCategory?.name ?? "Uncategorized";
-      } catch (err) {
-        console.error("⚠️ Failed to fetch categories:", err);
-        safeUpdates.productCat = "Uncategorized";
-      }
-    }
-
-    safeUpdates.updatedAt = new Date().toISOString();
-
-    await productRef.update(safeUpdates);
-
-    console.log("✅ Product updated:", productId, safeUpdates);
-    return { success: true, message: "Product field updated successfully" };
-  } catch (error) {
-    console.error("❌ updateProductField error:", error);
-    return { success: false, error: "Failed to update product field" };
-  }
-}
 
 
 
@@ -1145,7 +1117,7 @@ export const fetchLatestProducts = unstable_cache(
           image: data.image ?? "",
 
           isFeatured: data.isFeatured ?? false,
- favorite: data.favorite ?? false,
+          favorite: data.favorite ?? false,
           purchaseSession: data.purchaseSession ?? null,
 
           quantity: data.currentStock ?? null,
@@ -1157,6 +1129,14 @@ export const fetchLatestProducts = unstable_cache(
           taxRate: data.taxRate ?? undefined,
 
           taxType: data.taxType,
+          taxCategory:
+  data.taxCategory ?? "FOOD_GST",
+
+taxRate1:
+  data.taxRate1 ?? 0,
+
+taxType1:
+  data.taxType1 ?? "exclusive",
 
           sku: data.sku ?? "",
           barcode: data.barcode ?? "",

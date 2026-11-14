@@ -25,14 +25,14 @@ import { toTimestamp } from "@/utils/toTimestamp";
 import { toAdminTimestamp } from "@/utils/toAdminTimestamp";
 import { processSaleInventory } from "../inventory/processSaleInventory";
 import { checkStockAvailabilityV2 } from "../inventory/checkStockAvailabilityV2";
-import { addOrderToMaster } from "./addOrderToMaster";
-import { addProductDraft } from "./addProductDraft";
+import {  addOrderWithProducts } from "./addOrderToMaster";
+ 
 import { marketingData } from "./marketingData";
 import {   getFinancialYearCode, getNextWebOrderSerial } from "./getNextWebOrderSerial";
 
 export async function createNewOrder(purchaseData: orderDataType) {
 
- // console.log("addreas full oredr masrer---------------",purchaseData)
+  //console.log("createNewOrder: Start of order master ---------------",purchaseData)
   const {
     // -----------------------------
     // BASIC
@@ -100,12 +100,12 @@ export async function createNewOrder(purchaseData: orderDataType) {
   // =====================================================
   // 1️⃣ STOCK CHECK (BEFORE ANY CALCULATION)
   // =====================================================
-  if (SHOULD_MAINTAIN_STOCK) {
-    const stockCheck = await checkStockAvailabilityV2(cartData);
-    if (!stockCheck.success) {
-      return { success: false, message: stockCheck.message };
-    }
-  }
+  // if (SHOULD_MAINTAIN_STOCK) {
+  //   const stockCheck = await checkStockAvailabilityV2(cartData);
+  //   if (!stockCheck.success) {
+  //     return { success: false, message: stockCheck.message };
+  //   }
+  // }
 
   // =====================================================
   // 2️⃣ TAX CALCULATION (SERVER = SOURCE OF TRUTH)
@@ -131,48 +131,52 @@ export async function createNewOrder(purchaseData: orderDataType) {
 // 4️⃣ TIMESTAMPS
 // =====================================================
 
-const nowUTC = new Date().toISOString();
+ 
 
-const nowGerman = new Date().toLocaleString("en-DE", {
-  dateStyle: "medium",
-  timeStyle: "medium",
-  timeZone: "Europe/Berlin",
-});
-
-const timeNow = new Date().toLocaleString("en-IN", {
-  dateStyle: "medium",
-  timeStyle: "medium",
-  timeZone: "Asia/Kolkata",
-});
+ 
+ 
 
 
 // =====================================================
 // 5️⃣ VALIDATE SCHEDULED TIME
 // =====================================================
 
-const scheduledTimestamp = toAdminTimestamp(scheduledAt);
+// =====================================================
+// 5️⃣ VALIDATE SCHEDULED TIME
+// Preserve the exact restaurant-local date and time
+// =====================================================
 
-if (
-  scheduledTimestamp &&
-  scheduledTimestamp.toMillis() < Date.now()
-) {
+
+ // =====================================================
+ // 5️⃣ VALIDATE SCHEDULED TIME
+ // Interpret selected time in Europe/Madrid
+ // Store as Firestore Timestamp
+ // =====================================================
+
+
+const scheduledTimestamp = toAdminTimestamp(
+  scheduledAt || null
+);
+
+if (scheduledAt && !scheduledTimestamp) {
   return {
     success: false,
-    message: "Scheduled time is in the past",
+    message: "Invalid scheduled time",
   };
 }
 
-const MIN_BUFFER_MS = 30 * 60 * 1000; // 30 minutes
-
+// Compare absolute timestamps, not formatted clock times.
 if (
   scheduledTimestamp &&
-  scheduledTimestamp.toMillis() < Date.now() + MIN_BUFFER_MS
+  scheduledTimestamp.toMillis() <= Date.now()
 ) {
   return {
     success: false,
-    message: "Please select a time at least 30 minutes from now",
+    message: "Scheduled time must be in the future",
   };
 }
+
+
 
 
 // =====================================================
@@ -188,22 +192,61 @@ const orderSerialNo = await getNextWebOrderSerial(
 const new_srno = `WEB-${financialYear}-${orderSerialNo}`;
 
 
-// =====================================================
-// 7️⃣ ORDER / PAYMENT STATUS
-// =====================================================
 
-const paymentStatus =
-  paymentType === "COD"
-    ? "PAID"
-    : "NEW";
 
 
 // =====================================================
 // 8️⃣ ORDER MASTER DATA
 // =====================================================
 
- 
+const normalizedPaymentType =
+  paymentType?.toLowerCase();
 
+  const allowedPaymentTypes = [
+  "cash",
+  "cod",
+  "stripe",
+  "paypal",
+];
+
+if (
+  !normalizedPaymentType ||
+  !allowedPaymentTypes.includes(
+    normalizedPaymentType
+  )
+) {
+  return {
+    success: false,
+    message: "Invalid payment type.",
+  };
+}
+
+const isCashPayment =
+  normalizedPaymentType === "cash" ||
+  normalizedPaymentType === "cod";
+
+const paymentMode =
+  isCashPayment
+    ? "CASH"
+    : "ONLINE";
+
+const paymentProvider =
+  isCashPayment
+    ? "CASH"
+    : normalizedPaymentType === "stripe"
+      ? "STRIPE"
+      : normalizedPaymentType === "paypal"
+        ? "PAYPAL"
+        : "";
+
+const paymentMethod =
+  isCashPayment
+    ? "CASH"
+    : normalizedPaymentType === "stripe"
+      ? "CARD"
+      : normalizedPaymentType === "paypal"
+        ? "PAYPAL"
+        : "";
 
 const orderMasterData: orderMasterDataT = {
   // =====================================================
@@ -217,21 +260,21 @@ const orderMasterData: orderMasterDataT = {
   email,
 
   customerPhone: customerPhone || "",
-  customerCountryCode: "+91", //  default
+  customerCountryCode: "", //  default
 
   addressId,
 
   // ---------- Delivery Address Snapshot (FLAT) ----------
   dAddressLine1: deliveryAddressLine1 || "",
   dAddressLine2: deliveryAddressLine2 || "",
-  dCity: deliveryCity || "Jalandhar",
-  dState: deliveryState || "Punjab",
+  dCity: deliveryCity || "",
+  dState: deliveryState || "",
   dZipcode: deliveryZipcode || "",
   dLandmark: "", //  optional default
 
   tableNo,
-  orderType,
-  paymentMode:"CASH",
+orderType,
+paymentMode,
 
   ownerId: "temp_OW_ID",     // 🔑 Restaurant owner
   outletId: "temp_Oulet_ID", // 🔑 Outlet / Branch
@@ -266,9 +309,26 @@ const orderMasterData: orderMasterDataT = {
   // =====================================================
   // PAYMENT (DEFAULTS ADDED)
   // =====================================================
-  paymentStatus: "PAID",
-  paymentProvider: "CASH", //  safe default (STRIPE / PAYPAL later)
-  paymentMethod: "CASH",   //  VISA / GPAY later
+  
+
+paymentProvider,
+
+paymentMethod,
+
+paymentStatus:
+  isCashPayment
+    ? "PAID"
+    : "NEW",
+
+paidAmount:
+  isCashPayment
+    ? totals.grandTotal
+    : 0,
+
+dueAmount:
+  isCashPayment
+    ? 0
+    : totals.grandTotal,
 
   // =====================================================
   // ORDER STATE
@@ -285,7 +345,7 @@ const orderMasterData: orderMasterDataT = {
   // =====================================================
   // SYNC / OFFLINE (POS SAFE)
   // =====================================================
-  syncStatus: "SYNCED", //  default
+  syncStatus: "NEWONLINE", //  default
   lastSyncedAt: admin.firestore.FieldValue.serverTimestamp(),
 
   // =====================================================
@@ -319,14 +379,14 @@ const orderMasterData: orderMasterDataT = {
   // =====================================================
   // 8️⃣ SAVE ORDER MASTER
   // =====================================================
-  const orderMasterId = await addOrderToMaster(orderMasterData);
+  //const orderMasterId = await addOrderToMaster(orderMasterData);
+  const orderMasterId = await addOrderWithProducts(
+  orderMasterData,
+  cartWithTax,
+  userId!
+);
 
-  // =====================================================
-  // 9️⃣ SAVE ORDER PRODUCTS (WITH TAX SNAPSHOT)
-  // =====================================================
-  for (const product of cartWithTax) {
-    await addProductDraft(product, userId!, orderMasterId!);
-  }
+ 
 
   // ===================================================
 // 9.5️⃣ PROCESS INVENTORY
