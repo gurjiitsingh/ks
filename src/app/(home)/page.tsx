@@ -12,7 +12,8 @@ import HeroSectionCustom from "@/custom/cus-com/HeroSectionCustom";
 
 export default function Page() {
   return (
-    <main className="text-gray-900 font-sans">
+   <main className="min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-950 to-[#171717] font-sans text-gray-900">
+
 
       {/* ✅ Client-only animation init */}
       {/* <AOSInit /> */}

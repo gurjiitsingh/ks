@@ -131,7 +131,7 @@ const mappingData = await mappingRes.json();
 
   return (
     
-   <div id="menu-matrix" className="max-w-7xl mx-auto my-6 scroll-mt-20">
+   <div  className="max-w-7xl mx-auto my-6 scroll-mt-20">
       <div className="px-4 sm:px-6 lg:px-12">
         <div className={containerClass}>
           {products.map((product, i) => (

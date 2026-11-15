@@ -32,10 +32,10 @@ export default function HeroSectionLuxuryMinimal() {
           {/* Left Content */}
           <div className="relative z-10 max-w-2xl">
             {/* Halal Badge */}
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-600/15 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-red-400 backdrop-blur-md">
+            {/* <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-600/15 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-red-400 backdrop-blur-md">
               <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
               
-            </div>
+            </div> */}
 
             {/* Heading */}
             <h1 className="text-5xl font-black uppercase leading-[0.98] tracking-[-0.055em] sm:text-6xl md:text-7xl xl:text-[82px]">
@@ -53,16 +53,16 @@ export default function HeroSectionLuxuryMinimal() {
             </p>
 
             {/* Buttons */}
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex gap-3 flex-row">
               <button
                 onClick={() =>
                   document
-                    .getElementById("menu-matrix")
+                    .getElementById("order_now")
                     ?.scrollIntoView({ behavior: "smooth" })
                 }
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-red-600 px-7 py-4 text-xs font-bold uppercase tracking-wider text-white shadow-xl shadow-red-600/20 transition-all duration-300 hover:-translate-y-1 hover:bg-red-500"
               >
-                Order From Menu Matrix
+                Order Now
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
               </button>
 
@@ -71,7 +71,7 @@ export default function HeroSectionLuxuryMinimal() {
                 className="inline-flex items-center justify-center gap-3 rounded-full border border-white/20 bg-white/5 px-7 py-4 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md transition-all duration-300 hover:border-white/40 hover:bg-white/10"
               >
                 <ShoppingBag className="h-4 w-4" />
-                Online Order Setup
+                Menu
               </Link>
             </div>
           </div>

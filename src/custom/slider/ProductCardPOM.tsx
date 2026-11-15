@@ -6,12 +6,10 @@ import React, { useEffect, useState } from "react";
 
 import { cartProductType } from "@/lib/types/cartDataType";
 import { ProductType } from "@/lib/types/productType";
-import { addOnType } from "@/lib/types/addOnType";
-import { IoMdAdd } from "react-icons/io";
-import toast from "react-hot-toast";
-import AddOn from "../level-1/AddOn";
+
+
 import { formatCurrencyNumber } from "@/utils/formatCurrency";
-import CartButtonAdd from "../AddToCart/CartButtonAdd";
+
 import { Lato } from "next/font/google";
 
 const lato = Lato({

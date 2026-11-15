@@ -14,7 +14,6 @@ import type {
   CreateCustomerAddressInput,
 } from "@/modules/customer-account";
 
-
 const emptyAddress: CreateCustomerAddressInput = {
   firstName: "",
   lastName: "",
@@ -25,7 +24,7 @@ const emptyAddress: CreateCustomerAddressInput = {
   city: "",
   state: "",
   zipCode: "",
-  country: "United Kingdom",
+  country: "India",
   portal: "",
   staircase: "",
   floor: "",
@@ -33,7 +32,6 @@ const emptyAddress: CreateCustomerAddressInput = {
   deliveryNotes: "",
   isDefault: false,
 };
-
 
 type Props = {
   editId: string | null;
@@ -90,12 +88,13 @@ export default function CheckoutAddressForm({
             addressLine1: address.addressLine1 ?? "",
             addressLine2: address.addressLine2 ?? "",
             city: address.city ?? "",
-            state: "",
-country: "United Kingdom",
-portal: "",
-staircase: "",
-floor: "",
-door: "",
+            state: address.state ?? "",
+            zipCode: address.zipCode ?? "",
+            country: address.country ?? "India",
+            portal: address.portal ?? "",
+            staircase: address.staircase ?? "",
+            floor: address.floor ?? "",
+            door: address.door ?? "",
             deliveryNotes: address.deliveryNotes ?? "",
             isDefault: address.isDefault ?? false,
           });
@@ -136,19 +135,9 @@ async function save(event: React.FormEvent<HTMLFormElement>) {
 
   startTransition(async () => {
     try {
-     const addressData: CreateCustomerAddressInput = {
-  ...form,
-  country: "United Kingdom",
-  state: "",
-  portal: "",
-  staircase: "",
-  floor: "",
-  door: "",
-};
-
-const result = editId
-  ? await updateRegisteredCustomerAddress(editId, addressData)
-  : await addRegisteredCustomerAddress(addressData);
+      const result = editId
+        ? await updateRegisteredCustomerAddress(editId, form)
+        : await addRegisteredCustomerAddress(form);
 
       if (!result.success) {
         setError(result.error);
@@ -226,25 +215,26 @@ const result = editId
     return <p className="py-8 text-center">Loading address...</p>;
   }
 
-
-const fields = [
-  { name: "firstName", label: "First name", required: true },
-  { name: "lastName", label: "Last name", required: true },
-  { name: "email", label: "Email address", type: "email" },
-  { name: "mobNo", label: "Mobile number", required: true },
-  {
-    name: "addressLine1",
-    label: "House number and street name",
-    required: true,
-  },
-  {
-    name: "addressLine2",
-    label: "Flat / Apartment / Building name",
-  },
-  { name: "city", label: "Town / City", required: true },
-  { name: "zipCode", label: "Postcode", required: true },
-] as const;
-
+  const fields = [
+    { name: "firstName", label: "First name", required: true },
+    { name: "lastName", label: "Last name", required: true },
+    { name: "email", label: "Email", type: "email" },
+    { name: "mobNo", label: "Mobile number", required: true },
+    {
+      name: "addressLine1",
+      label: "Address line 1",
+      required: true,
+    },
+    { name: "addressLine2", label: "Address line 2" },
+    { name: "city", label: "City", required: true },
+    { name: "state", label: "State / Province" },
+    { name: "zipCode", label: "Postal code", required: true },
+    { name: "country", label: "Country", required: true },
+    { name: "portal", label: "Portal / Entrance" },
+    { name: "staircase", label: "Staircase" },
+    { name: "floor", label: "Floor" },
+    { name: "door", label: "Door / Apartment" },
+  ] as const;
 
   return (
     <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
@@ -271,28 +261,15 @@ const fields = [
                 {"required" in field && field.required && " *"}
               </span>
 
-    
-<input
-  name={field.name}
-  type={"type" in field ? field.type : "text"}
-  value={String(form[field.name] ?? "")}
-  required={"required" in field && field.required}
-  maxLength={250}
-autoComplete={
-  field.name === "firstName" ? "given-name" :
-  field.name === "lastName" ? "family-name" :
-  field.name === "email" ? "email" :
-  field.name === "mobNo" ? "tel" :
-  field.name === "addressLine1" ? "address-line1" :
-  field.name === "addressLine2" ? "address-line2" :
-  field.name === "city" ? "address-level2" :
-  field.name === "zipCode" ? "postal-code" :
-  "off"
-}
-  onChange={change}
-  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-/>
-
+              <input
+                name={field.name}
+                type={"type" in field ? field.type : "text"}
+                value={String(form[field.name] ?? "")}
+                required={"required" in field && field.required}
+                maxLength={250}
+                onChange={change}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
             </label>
           ))}
         </div>
